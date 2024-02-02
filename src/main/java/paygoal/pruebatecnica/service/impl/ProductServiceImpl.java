@@ -1,6 +1,5 @@
 package paygoal.pruebatecnica.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import paygoal.pruebatecnica.entity.ProductEntity;
@@ -12,15 +11,22 @@ import paygoal.pruebatecnica.repository.ProductRepository;
 import paygoal.pruebatecnica.service.ProductService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-    private ProductRepository productRepository;
-    private ProductMapper productMapper;
+    private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
 
     @Override
     public ProductResponse createProduct(CreateProductRequest createProductRequest) {
+        Optional<ProductEntity> productEntity = productRepository.findProductByName(createProductRequest.getNombre());
+
+        if (productEntity.isPresent()) {
+            throw new RuntimeException("product name in use");
+        }
+
         ProductEntity productEntityToSave = productMapper.requestToEntity(createProductRequest);
         ProductEntity productEntitySaved = productRepository.save(productEntityToSave);
         return productMapper.entityToResponse(productEntitySaved);
@@ -28,7 +34,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse updateProduct(UpdateProductRequest updateProductRequest) {
-        this.findProductEntityById(updateProductRequest.getId());
+        Optional<ProductEntity> productEntity = productRepository.findById(updateProductRequest.getId());
+
+        if (productEntity.isEmpty()) {
+            throw new RuntimeException("product to edit not found");
+        }
         ProductEntity productEntityToUpdate = productMapper.requestToEntity(updateProductRequest);
         ProductEntity productEntityUpdated = productRepository.save(productEntityToUpdate);
         return productMapper.entityToResponse(productEntityUpdated);
@@ -36,27 +46,31 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse findProductById(Long productId) {
-        ProductEntity productEntity = this.findProductEntityById(productId);
+        ProductEntity productEntity = productRepository.findById(productId)
+                                                       .orElseThrow(() -> new RuntimeException("product not found"));
         return productMapper.entityToResponse(productEntity);
     }
 
     @Override
     public ProductResponse findProductByName(String name) {
-        ProductEntity productEntity = this.findProductEntityByName(name);
+        ProductEntity productEntity = productRepository.findProductByName(name)
+                                                       .orElseThrow(() -> new RuntimeException("product not found"));
         return productMapper.entityToResponse(productEntity);
     }
 
     @Override
     public void deleteProductById(Long productId) {
-        this.findProductEntityById(productId);
-        productRepository.deleteById(productId);
+        ProductEntity productEntity = productRepository.findById(productId)
+                                                       .orElseThrow(() -> new RuntimeException("product to delete doesn't exist"));
+
+        productRepository.delete(productEntity);
     }
 
     @Override
     public List<ProductResponse> findAllProductsSortedByPriceAsc() {
         List<ProductEntity> productEntityList = productRepository.findAllProductsSortedByPriceAsc();
         return productEntityList.stream()
-                                .map(productEntity -> productMapper.entityToResponse(productEntity))
+                                .map(productMapper::entityToResponse)
                                 .toList();
     }
 
@@ -64,17 +78,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductResponse> findAllProductsSortedByPriceDesc() {
         List<ProductEntity> productEntityList = productRepository.findAllProductsSortedByPriceDesc();
         return productEntityList.stream()
-                                .map(productEntity -> productMapper.entityToResponse(productEntity))
+                                .map(productMapper::entityToResponse)
                                 .toList();
-    }
-
-    private ProductEntity findProductEntityById(Long productId) {
-        return productRepository.findById(productId)
-                                .orElseThrow(() -> new EntityNotFoundException("product not found"));
-    }
-
-    private ProductEntity findProductEntityByName(String name) {
-        return productRepository.findProductByName(name)
-                                .orElseThrow(() -> new EntityNotFoundException("product not found"));
     }
 }
