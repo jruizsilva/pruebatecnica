@@ -3,6 +3,8 @@ package paygoal.pruebatecnica.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import paygoal.pruebatecnica.entity.ProductEntity;
+import paygoal.pruebatecnica.exceptions.CustomEntityNotFoundException;
+import paygoal.pruebatecnica.exceptions.CustomFieldValueNotAllowedException;
 import paygoal.pruebatecnica.http.request.product.CreateProductRequest;
 import paygoal.pruebatecnica.http.request.product.UpdateProductRequest;
 import paygoal.pruebatecnica.http.response.product.ProductResponse;
@@ -24,7 +26,7 @@ public class ProductServiceImpl implements ProductService {
         Optional<ProductEntity> productEntity = productRepository.findProductByName(createProductRequest.getNombre());
 
         if (productEntity.isPresent()) {
-            throw new RuntimeException("product name in use");
+            throw new CustomFieldValueNotAllowedException("product name in use");
         }
 
         ProductEntity productEntityToSave = productMapper.requestToEntity(createProductRequest);
@@ -37,7 +39,7 @@ public class ProductServiceImpl implements ProductService {
         Optional<ProductEntity> productEntity = productRepository.findById(updateProductRequest.getId());
 
         if (productEntity.isEmpty()) {
-            throw new RuntimeException("product to edit not found");
+            throw new CustomEntityNotFoundException("product to edit not found");
         }
         ProductEntity productEntityToUpdate = productMapper.requestToEntity(updateProductRequest);
         ProductEntity productEntityUpdated = productRepository.save(productEntityToUpdate);
@@ -47,21 +49,21 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse findProductById(Long productId) {
         ProductEntity productEntity = productRepository.findById(productId)
-                                                       .orElseThrow(() -> new RuntimeException("product not found"));
+                                                       .orElseThrow(() -> new CustomEntityNotFoundException("product not found"));
         return productMapper.entityToResponse(productEntity);
     }
 
     @Override
     public ProductResponse findProductByName(String name) {
         ProductEntity productEntity = productRepository.findProductByName(name)
-                                                       .orElseThrow(() -> new RuntimeException("product not found"));
+                                                       .orElseThrow(() -> new CustomEntityNotFoundException("product not found"));
         return productMapper.entityToResponse(productEntity);
     }
 
     @Override
     public void deleteProductById(Long productId) {
         ProductEntity productEntity = productRepository.findById(productId)
-                                                       .orElseThrow(() -> new RuntimeException("product to delete not found"));
+                                                       .orElseThrow(() -> new CustomEntityNotFoundException("product to delete not found"));
 
         productRepository.delete(productEntity);
     }
