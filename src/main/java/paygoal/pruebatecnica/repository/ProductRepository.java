@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     @Query("select p from ProductEntity p where upper(p.nombre) = upper(:nombre)")
     Optional<ProductEntity> findProductByName(@Param("nombre") String nombre);
+    @Query("select p from ProductEntity p where upper(p.nombre) like upper(concat('%', :nombre, '%'))")
+    List<ProductEntity> findAllProductsByName(@Param("nombre") String nombre);
     @Query("select p from ProductEntity p order by p.precio ASC")
     List<ProductEntity> findAllProductsSortedByPriceAsc();
     @Query("select p from ProductEntity p order by p.precio DESC")

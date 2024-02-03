@@ -14,4 +14,5 @@ public interface ProductService {
     void deleteProductById(Long productId);
     List<ProductResponse> findAllProductsSortedByPriceAsc();
     List<ProductResponse> findAllProductsSortedByPriceDesc();
+    List<ProductResponse> findAllProductsByName(String name);
 }

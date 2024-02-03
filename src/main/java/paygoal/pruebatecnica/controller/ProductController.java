@@ -37,8 +37,8 @@ public class ProductController {
     }
 
     @GetMapping("/search/{productName}")
-    public ResponseEntity<ProductResponse> findProductByName(@PathVariable String productName) {
-        return ResponseEntity.ok(productService.findProductByName(productName));
+    public ResponseEntity<List<ProductResponse>> findProductByName(@PathVariable String productName) {
+        return ResponseEntity.ok(productService.findAllProductsByName(productName));
     }
 
     @GetMapping

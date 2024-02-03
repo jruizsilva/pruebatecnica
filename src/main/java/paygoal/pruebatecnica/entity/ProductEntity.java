@@ -20,8 +20,6 @@ public class ProductEntity {
             nullable = false)
     private Long id;
 
-    @Column(unique = true,
-            updatable = false)
     private String nombre;
     private String descripcion;
     private BigDecimal precio;

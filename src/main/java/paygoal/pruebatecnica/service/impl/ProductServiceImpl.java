@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import paygoal.pruebatecnica.entity.ProductEntity;
 import paygoal.pruebatecnica.exceptions.CustomEntityNotFoundException;
-import paygoal.pruebatecnica.exceptions.CustomFieldValueNotAllowedException;
 import paygoal.pruebatecnica.http.request.product.CreateProductRequest;
 import paygoal.pruebatecnica.http.request.product.UpdateProductRequest;
 import paygoal.pruebatecnica.http.response.product.ProductResponse;
@@ -23,12 +22,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse createProduct(CreateProductRequest createProductRequest) {
-        Optional<ProductEntity> productEntity = productRepository.findProductByName(createProductRequest.getNombre());
-
-        if (productEntity.isPresent()) {
-            throw new CustomFieldValueNotAllowedException("product name in use");
-        }
-
         ProductEntity productEntityToSave = productMapper.requestToEntity(createProductRequest);
         ProductEntity productEntitySaved = productRepository.save(productEntityToSave);
         return productMapper.entityToResponse(productEntitySaved);
@@ -79,6 +72,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponse> findAllProductsSortedByPriceDesc() {
         List<ProductEntity> productEntityList = productRepository.findAllProductsSortedByPriceDesc();
+        return productEntityList.stream()
+                                .map(productMapper::entityToResponse)
+                                .toList();
+    }
+
+    @Override
+    public List<ProductResponse> findAllProductsByName(String name) {
+        List<ProductEntity> productEntityList = productRepository.findAllProductsByName(name);
         return productEntityList.stream()
                                 .map(productMapper::entityToResponse)
                                 .toList();
