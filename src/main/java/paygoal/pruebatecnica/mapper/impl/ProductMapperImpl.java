@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Component
 public class ProductMapperImpl implements ProductMapper {
     @Override
-    public ProductEntity requestToEntity(CreateProductRequest createProductRequest) {
+    public ProductEntity createProductRequestToEntity(CreateProductRequest createProductRequest) {
         return ProductEntity.builder()
                             .nombre(createProductRequest.getNombre())
                             .descripcion(createProductRequest.getDescripcion())
@@ -22,10 +22,8 @@ public class ProductMapperImpl implements ProductMapper {
     }
 
     @Override
-    public ProductEntity requestToEntity(UpdateProductRequest updateProductRequest) {
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setId(updateProductRequest.getId());
-
+    public ProductEntity updateProductRequestToEntity(UpdateProductRequest updateProductRequest,
+                                                      ProductEntity productEntity) {
         String nombre = updateProductRequest.getNombre();
         String descripcion = updateProductRequest.getDescripcion();
         BigDecimal precio = updateProductRequest.getPrecio();

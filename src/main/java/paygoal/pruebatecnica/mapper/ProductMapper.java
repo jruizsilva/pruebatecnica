@@ -6,9 +6,10 @@ import paygoal.pruebatecnica.http.request.product.UpdateProductRequest;
 import paygoal.pruebatecnica.http.response.product.ProductResponse;
 
 public interface ProductMapper {
-    ProductEntity requestToEntity(CreateProductRequest createProductRequest);
+    ProductEntity createProductRequestToEntity(CreateProductRequest createProductRequest);
 
-    ProductEntity requestToEntity(UpdateProductRequest updateProductRequest);
+    ProductEntity updateProductRequestToEntity(UpdateProductRequest updateProductRequest,
+                                               ProductEntity productEntity);
 
     ProductResponse entityToResponse(ProductEntity productEntity);
 }

@@ -22,19 +22,21 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse createProduct(CreateProductRequest createProductRequest) {
-        ProductEntity productEntityToSave = productMapper.requestToEntity(createProductRequest);
+        ProductEntity productEntityToSave = productMapper.createProductRequestToEntity(createProductRequest);
         ProductEntity productEntitySaved = productRepository.save(productEntityToSave);
         return productMapper.entityToResponse(productEntitySaved);
     }
 
     @Override
     public ProductResponse updateProduct(UpdateProductRequest updateProductRequest) {
-        Optional<ProductEntity> productEntity = productRepository.findById(updateProductRequest.getId());
+        Optional<ProductEntity> productEntityOptional = productRepository.findById(updateProductRequest.getId());
 
-        if (productEntity.isEmpty()) {
+        if (productEntityOptional.isEmpty()) {
             throw new CustomEntityNotFoundException("product to edit not found");
         }
-        ProductEntity productEntityToUpdate = productMapper.requestToEntity(updateProductRequest);
+        ProductEntity productEntity = productEntityOptional.get();
+        ProductEntity productEntityToUpdate = productMapper.updateProductRequestToEntity(updateProductRequest,
+                                                                                         productEntity);
         ProductEntity productEntityUpdated = productRepository.save(productEntityToUpdate);
         return productMapper.entityToResponse(productEntityUpdated);
     }
